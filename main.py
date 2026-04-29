@@ -1,8 +1,24 @@
 import asyncio
+import re
+import unicodedata
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
 BOT_TOKEN = "8726621448:AAF1wT6RBE1UXU5VlhGJMQqL4J4rSbu4G4s"
+
+def clean_text(text: str) -> str:
+    """Ko'rinmas belgilar va unicode tricks ni tozalash"""
+    # Barcha ko'rinmas/control belgilarni o'chirish
+    cleaned = ""
+    for ch in text:
+        cat = unicodedata.category(ch)
+        # Cf = format chars (zero-width, soft hyphen va h.k.)
+        # Cc = control chars
+        if cat not in ("Cf", "Cc"):
+            cleaned += ch
+    # Bir nechta bo'shliqlarni birga qo'shish
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned.lower()
 
 PROFIL_KEYWORDS = [
     "profilimda", "profilimga", "profilga", "profilim",
@@ -15,32 +31,50 @@ SPAM_ACTIONS = [
     "tashrif", "obuna", "kutmoqda", "kutaman", "boling",
     "buyring", "qoling", "videolar", "video", "kontent",
     "birga bo'lish", "lazzat", "hamma narsa bor", "maxsus",
-    "men bilan", "kir va", "qo'l qo'y",
+    "men bilan", "kir va", "qo'l qo'y", "rohatlan",
+    "jonli", "ho'l bo'l", "hol bol", "tanam bilan",
+    "og'zim", "qo'lim", "butun tan",
 ]
 
 ALWAYS_BLOCK = [
-    "hammaga salom, profilim",
-    "salom hammaga, profilim",
+    "profilimga o't",
+    "profilimga ot",
+    "profilga o't",
+    "profilimga kir",
+    "profilga kir",
+    "profilimga qarang",
+    "mening profilimga",
     "hammaga salom profilim",
     "salom hammaga profilim",
-    "birga bo'lish va to'liq",
-    "hamma narsa bor — kir",
-    "hamma narsa bor - kir",
-    "kir va qo'l qo'y",
-    "profilimga qarang",
-    "profilga qarang",
-    "mening profilimga",
+    "birga ho'l bo'l",
+    "birga hol bol",
+    "rohatlantirayotganimni",
+    "jonli ravishda",
 ]
+
+# Spam emoji
+SPAM_EMOJIS = ["👄", "💋", "🔞", "💦", "🍑", "🍆"]
 
 def is_spam(text: str) -> bool:
     if not text:
         return False
-    t = text.lower()
+    
+    t = clean_text(text)
 
+    # Spam emoji bormi matnda
+    if any(e in text for e in SPAM_EMOJIS):
+        # Emoji + profil = spam
+        has_profil = any(k in t for k in PROFIL_KEYWORDS)
+        has_action = any(a in t for a in SPAM_ACTIONS)
+        if has_profil or has_action:
+            return True
+
+    # Har doim bloklash
     for phrase in ALWAYS_BLOCK:
         if phrase in t:
             return True
 
+    # Profil + harakat
     has_profil = any(k in t for k in PROFIL_KEYWORDS)
     if not has_profil:
         return False
@@ -48,9 +82,7 @@ def is_spam(text: str) -> bool:
     has_hammaga = "hammaga" in t or "hamag" in t or "hamma" in t
     has_action = any(a in t for a in SPAM_ACTIONS)
 
-    if has_hammaga:
-        return True
-    if has_action:
+    if has_hammaga or has_action:
         return True
 
     return False
@@ -64,16 +96,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if chat.type not in ["group", "supergroup"]:
         return
 
-    # Matn spam tekshirish
     if message.text and is_spam(message.text):
         await ban_user(context, chat.id, user, message)
         return
 
-    # Stiker tekshirish
     if message.sticker:
         emoji = message.sticker.emoji or ""
-        adult_emojis = ["👄", "💋", "🔞", "💦", "🍑", "🍆"]
-        if any(e in emoji for e in adult_emojis):
+        if any(e in emoji for e in SPAM_EMOJIS):
             await ban_user(context, chat.id, user, message)
             return
 
