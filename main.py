@@ -23,7 +23,7 @@ def clean_text(text: str) -> str:
 PROFIL_KEYWORDS = [
     "profilimda", "profilimga", "profilga", "profilim",
     "profilimd", "proflimda", "proflimga", "proflim",
-    "mening profilim",
+    "mening profilim","sahifamga", "sahifam", "kanalimga", "kanalim",
 ]
 
 SPAM_ACTIONS = [
@@ -33,7 +33,10 @@ SPAM_ACTIONS = [
     "birga bo'lish", "lazzat", "hamma narsa bor", "maxsus",
     "men bilan", "kir va", "qo'l qo'y", "rohatlan",
     "jonli", "ho'l bo'l", "hol bol", "tanam bilan",
-    "og'zim", "qo'lim", "butun tan",
+    "og'zim", "qo'lim", "butun tan","ko'ring"
+"bir ko'r"
+"pushaymon""ko'rib chiqing", "kurib chiqing", "sinab ko'ring",
+"hayron qolasiz","tomosha qiling", "siz uchun bor",
 ]
 
 ALWAYS_BLOCK = [
@@ -50,6 +53,12 @@ ALWAYS_BLOCK = [
     "birga hol bol",
     "rohatlantirayotganimni",
     "jonli ravishda",
+    "profilimni bir ko'ring"
+    "profilimga tashrif buyring",
+"sahifamga o'ting",
+"sahifamga kiring",
+"kanalimga o'ting",
+"kanalimga kiring",
 ]
 
 # Spam emoji
