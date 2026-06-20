@@ -6,9 +6,9 @@ from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
 BOT_TOKEN = "8726621448:AAF1wT6RBE1UXU5VlhGJMQqL4J4rSbu4G4s"
 
+
 def clean_text(text: str) -> str:
     """Ko'rinmas belgilar va unicode tricks ni tozalash"""
-    # Barcha ko'rinmas/control belgilarni o'chirish
     cleaned = ""
     for ch in text:
         cat = unicodedata.category(ch)
@@ -16,63 +16,61 @@ def clean_text(text: str) -> str:
         # Cc = control chars
         if cat not in ("Cf", "Cc"):
             cleaned += ch
-    # Bir nechta bo'shliqlarni birga qo'shish
-    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
     return cleaned.lower()
+
 
 PROFIL_KEYWORDS = [
     "profilimda", "profilimga", "profilga", "profilim",
     "profilimd", "proflimda", "proflimga", "proflim",
-    "mening profilim","sahifamga", "sahifam", "kanalimga", "kanalim",
+    "mening profilim", "profilimni",
+    "sahifamga", "sahifam", "kanalimga", "kanalim",
 ]
 
 SPAM_ACTIONS = [
     "o'ting", "oting", "kiring", "kring", "qarang",
+    "ko'ring", "koring", "bir ko'r", "bir kor",
     "tashrif", "obuna", "kutmoqda", "kutaman", "boling",
     "buyring", "qoling", "videolar", "video", "kontent",
     "birga bo'lish", "lazzat", "hamma narsa bor", "maxsus",
     "men bilan", "kir va", "qo'l qo'y", "rohatlan",
     "jonli", "ho'l bo'l", "hol bol", "tanam bilan",
-    "og'zim", "qo'lim", "butun tan","ko'ring"
-"bir ko'r"
-"pushaymon""ko'rib chiqing", "kurib chiqing", "sinab ko'ring",
-"hayron qolasiz","tomosha qiling", "siz uchun bor",
+    "og'zim", "qo'lim", "butun tan",
+    "pushaymon", "pushoymon", "afsuslanmaysiz",
+    "kurib chiqing", "sinab ko'ring", "hayron qolasiz",
+    "tomosha qiling", "siz uchun bor", "qiziqarli",
+    "kutib qolaman", "aqlingdan ozasan",
+    "iflosi shu yerda", "eng iflos",
 ]
 
 ALWAYS_BLOCK = [
-    "profilimga o't",
-    "profilimga ot",
-    "profilga o't",
-    "profilimga kir",
-    "profilga kir",
-    "profilimga qarang",
-    "mening profilimga",
-    "hammaga salom profilim",
-    "salom hammaga profilim",
-    "birga ho'l bo'l",
-    "birga hol bol",
-    "rohatlantirayotganimni",
-    "jonli ravishda",
-    "profilimni bir ko'ring"
+    "profilimga o't", "profilimga ot", "profilga o't",
+    "profilimga kir", "profilga kir", "profilimga qarang",
+    "profilimni bir ko'ring", "profilimni bir koring",
+    "profilimni ko'ring", "profilimni koring",
+    "mening profilimga", "hammaga salom profilim",
+    "salom hammaga profilim", "birga ho'l bo'l",
+    "rohatlantirayotganimni", "jonli ravishda",
+    "pushaymon bo'lmaysiz", "pushaymon bolmaysiz",
     "profilimga tashrif buyring",
-"sahifamga o'ting",
-"sahifamga kiring",
-"kanalimga o'ting",
-"kanalimga kiring",
+    "sahifamga o'ting", "sahifamga kiring",
+    "kanalimga o'ting", "kanalimga kiring",
+    "qiziqarli narsalar bor", "kutib qolaman",
+    "aqlingdan ozasan", "eng iflosi shu yerda",
 ]
 
 # Spam emoji
-SPAM_EMOJIS = ["👄", "💋", "🔞", "💦", "🍑", "🍆"]
+SPAM_EMOJIS = ["👄", "💋", "🔞", "💦", "🍑", "🍆", "🫦"]
+
 
 def is_spam(text: str) -> bool:
     if not text:
         return False
-    
+
     t = clean_text(text)
 
     # Spam emoji bormi matnda
     if any(e in text for e in SPAM_EMOJIS):
-        # Emoji + profil = spam
         has_profil = any(k in t for k in PROFIL_KEYWORDS)
         has_action = any(a in t for a in SPAM_ACTIONS)
         if has_profil or has_action:
@@ -96,6 +94,7 @@ def is_spam(text: str) -> bool:
 
     return False
 
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
     if not message:
@@ -115,6 +114,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await ban_user(context, chat.id, user, message)
             return
 
+
 async def ban_user(context, chat_id, user, message):
     try:
         await message.delete()
@@ -122,6 +122,7 @@ async def ban_user(context, chat_id, user, message):
         print(f"Bloklandi: {user.full_name} (@{user.username})")
     except Exception as e:
         print(f"Xato: {e}")
+
 
 async def main():
     print("Spam bot ishga tushdi...")
@@ -139,6 +140,7 @@ async def main():
         await app.updater.stop()
         await app.stop()
         await app.shutdown()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
