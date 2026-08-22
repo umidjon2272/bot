@@ -6,7 +6,9 @@ from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
 import os
 
-BOT_TOKEN = 8726621448:AAE2rO43F7ovWXQfHxuk3Pmk8cj8_DTE_xk
+import os
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 
 def clean_text(text: str) -> str:
