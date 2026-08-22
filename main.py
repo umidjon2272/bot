@@ -1,15 +1,10 @@
 import asyncio
-import os
 import re
 import unicodedata
-
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-
-if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN environment variable topilmadi")
+BOT_TOKEN = "8726621448:AAE2rO43F7ovWXQfHxuk3Pmk8cj8_DTE_xk"
 
 
 def clean_text(text: str) -> str:
@@ -104,8 +99,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
     if not message:
         return
+
     chat = message.chat
     user = message.from_user
+
     if chat.type not in ["group", "supergroup"]:
         return
 
@@ -123,7 +120,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ban_user(context, chat_id, user, message):
     try:
         await message.delete()
-        await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+        await context.bot.ban_chat_member(
+            chat_id=chat_id,
+            user_id=user.id
+        )
         print(f"Bloklandi: {user.full_name} (@{user.username})")
     except Exception as e:
         print(f"Xato: {e}")
@@ -131,12 +131,19 @@ async def ban_user(context, chat_id, user, message):
 
 async def main():
     print("Spam bot ishga tushdi...")
+
     app = Application.builder().token(BOT_TOKEN).build()
-    app.add_handler(MessageHandler(filters.ALL, handle_message))
+
+    app.add_handler(
+        MessageHandler(filters.ALL, handle_message)
+    )
+
     await app.initialize()
     await app.start()
     await app.updater.start_polling()
+
     print("Bot ishlayapti!")
+
     try:
         await asyncio.Event().wait()
     except KeyboardInterrupt:
