@@ -8,7 +8,7 @@ import os
 
 import os
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = 8726621448:AAE2rO43F7ovWXQfHxuk3Pmk8cj8_DTE_xk
 
 
 def clean_text(text: str) -> str:
