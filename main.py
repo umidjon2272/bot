@@ -4,7 +4,9 @@ import unicodedata
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
-BOT_TOKEN = "8726621448:AAF1wT6RBE1UXU5VlhGJMQqL4J4rSbu4G4s"
+import os
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 
 def clean_text(text: str) -> str:
